@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <Nullable>enable</Nullable>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>Assets/SysPulse.ico</ApplicationIcon>
+    <Version>0.5.4</Version>
+  </PropertyGroup>
+  <ItemGroup>
+    <Resource Include="Assets/SysPulse.ico" />
+    <EmbeddedResource Include="Assets/Lucide-LICENSE.txt" />
+    <PackageReference Include="Microsoft.Diagnostics.Tracing.TraceEvent" Version="4.0.0" />
+    <PackageReference Include="System.Management" Version="10.0.14" />
+    <!-- 设置窗使用实色底，保留 Fluent 控件主题，关闭自动应用的 Mica 背景。 -->
+    <RuntimeHostConfigurationOption Include="Switch.System.Windows.Appearance.DisableFluentThemeWindowBackdrop" Value="true" />
+  </ItemGroup>
+  <PropertyGroup Condition="'$(PublishSingleFile)' == 'true'">
+    <!-- 仅解包原生库。托管程序集直接映射未压缩的单文件，减少临时磁盘占用和私有工作集。 -->
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <DebugType>None</DebugType>
+  </PropertyGroup>
+</Project>

@@ -1,0 +1,94 @@
+<Window x:Class="SysPulse.MonitorBar"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:SysPulse"
+        Title="SysPulse 监控条" WindowStyle="None" ResizeMode="NoResize"
+        AllowsTransparency="True" Background="Transparent" ShowActivated="False"
+        ShowInTaskbar="False" Topmost="True" UseLayoutRounding="True">
+    <Window.Resources>
+        <LinearGradientBrush x:Key="DarkCapsuleFill" StartPoint="0.15,0" EndPoint="0.6,1">
+            <GradientStop Color="#455165" Offset="0"/>
+            <GradientStop Color="#343F50" Offset="0.42"/>
+            <GradientStop Color="#272F3B" Offset="1"/>
+        </LinearGradientBrush>
+        <LinearGradientBrush x:Key="DarkCapsuleEdge" StartPoint="0,0" EndPoint="0,1">
+            <GradientStop Color="#A7B7CD" Offset="0"/>
+            <GradientStop Color="#59677B" Offset="0.58"/>
+            <GradientStop Color="#485467" Offset="1"/>
+        </LinearGradientBrush>
+        <LinearGradientBrush x:Key="LightCapsuleFill" StartPoint="0.15,0" EndPoint="0.6,1">
+            <GradientStop Color="#FFFFFF" Offset="0"/>
+            <GradientStop Color="#F0F5FA" Offset="0.42"/>
+            <GradientStop Color="#E0E8F2" Offset="1"/>
+        </LinearGradientBrush>
+        <LinearGradientBrush x:Key="LightCapsuleEdge" StartPoint="0,0" EndPoint="0,1">
+            <GradientStop Color="#FFFFFF" Offset="0"/>
+            <GradientStop Color="#B5C3D4" Offset="0.65"/>
+            <GradientStop Color="#ACBACD" Offset="1"/>
+        </LinearGradientBrush>
+        <!-- 监控条自带的符号与层叠图标，共用面板的 24×24 矢量坐标。 -->
+        <PathGeometry x:Key="IconChevronDownload" Figures="M 5,9 L 12,16 L 19,9"/>
+        <PathGeometry x:Key="IconChevronUpload" Figures="M 5,15 L 12,8 L 19,15"/>
+        <PathGeometry x:Key="IconTriangleDownload" Figures="M 4,7 L 20,7 L 12,18 Z"/>
+        <PathGeometry x:Key="IconTriangleUpload" Figures="M 4,17 L 20,17 L 12,6 Z"/>
+        <PathGeometry x:Key="IconMemoryLayers" Figures="M 3,8 L 12,3 L 21,8 L 12,13 Z M 3,12 L 12,17 L 21,12 M 3,16 L 12,21 L 21,16"/>
+    </Window.Resources>
+    <!-- 分层窗口会让完全透明的像素穿透，最低非零透明度使整条都可点击。 -->
+    <Border Background="#01000000" MouseRightButtonUp="OpenBarMenu">
+        <Viewbox Stretch="Uniform" StretchDirection="DownOnly"
+                 HorizontalAlignment="Center" VerticalAlignment="Center">
+            <Grid x:Name="Capsule">
+                <!-- 描边单独绘制；有背景时在指标之外留白，透明模式保持紧凑。 -->
+                <Border x:Name="CapsuleSurface" CornerRadius="10" BorderThickness="1"
+                        Opacity="0" IsHitTestVisible="False"/>
+                <StackPanel x:Name="Metrics" Orientation="Horizontal" Margin="7,0,5,0">
+                    <StackPanel x:Name="NetworkBlock" HorizontalAlignment="Center" VerticalAlignment="Center" TextBlock.FontFamily="Consolas">
+                        <StackPanel x:Name="DownloadLine" Orientation="Horizontal" HorizontalAlignment="Center" ToolTip="整机下载速率">
+                            <local:PanelIcon x:Name="DownloadIcon" Data="{StaticResource IconDownload}" Width="11" Height="11" Margin="0,0,3,0"/>
+                            <TextBlock x:Name="DownloadText" VerticalAlignment="Center"/>
+                        </StackPanel>
+                        <StackPanel x:Name="UploadLine" Orientation="Horizontal" HorizontalAlignment="Center" ToolTip="整机上传速率">
+                            <local:PanelIcon x:Name="UploadIcon" Data="{StaticResource IconUpload}" Width="11" Height="11" Margin="0,0,3,0"/>
+                            <TextBlock x:Name="UploadText" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </StackPanel>
+                    <Border x:Name="FirstDivider" Width="1" Height="17" Margin="4,0"
+                            VerticalAlignment="Center" IsHitTestVisible="False"/>
+                    <Border x:Name="CpuGroup" HorizontalAlignment="Center" VerticalAlignment="Center" ToolTip="整机 CPU 使用率">
+                        <StackPanel x:Name="CpuBlock" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <TextBlock x:Name="CpuText" TextAlignment="Center" FontWeight="SemiBold"/>
+                            <StackPanel x:Name="CpuCaption" Orientation="Horizontal" HorizontalAlignment="Center">
+                                <local:PanelIcon x:Name="CpuIcon" Width="13" Height="13" Margin="0,0,3,0"/>
+                                <TextBlock x:Name="CpuLabel" TextAlignment="Center"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                    <Border x:Name="SecondDivider" Width="1" Height="17" Margin="4,0"
+                            VerticalAlignment="Center" IsHitTestVisible="False"/>
+                    <Grid x:Name="MemoryGroup" HorizontalAlignment="Center" VerticalAlignment="Center" ToolTip="物理内存使用率">
+                        <StackPanel x:Name="MemoryRing" Orientation="Horizontal">
+                            <local:PanelIcon x:Name="RingIcon" Width="13" Height="13" Margin="0,0,3,0"/>
+                            <TextBlock x:Name="RingLabel" VerticalAlignment="Center" Margin="1,0,3,0"/>
+                            <Viewbox x:Name="RingGraphic" Width="34" Height="36">
+                                <!-- 环线与百分比共用圆心，避免缩放前分别取整造成偏移。 -->
+                                <Grid Width="34" Height="34" UseLayoutRounding="False">
+                                    <Ellipse x:Name="MemoryTrack" Margin="2" StrokeThickness="2"/>
+                                    <Path x:Name="MemoryArc" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                                    <TextBlock x:Name="RingText" FontWeight="SemiBold" TextAlignment="Center"
+                                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Grid>
+                            </Viewbox>
+                        </StackPanel>
+                        <StackPanel x:Name="MemoryBlock">
+                            <TextBlock x:Name="MemoryText" TextAlignment="Center" FontWeight="SemiBold"/>
+                            <StackPanel x:Name="MemoryCaption" Orientation="Horizontal" HorizontalAlignment="Center">
+                                <local:PanelIcon x:Name="MemoryIcon" Width="13" Height="13" Margin="0,0,3,0"/>
+                                <TextBlock x:Name="MemoryLabel" TextAlignment="Center"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </Grid>
+        </Viewbox>
+    </Border>
+</Window>

@@ -1,0 +1,17 @@
+bin/
+obj/
+artifacts/
+.vs/
+.pi/
+*.user
+*.suo
+*.pfx
+*.p12
+
+# 便携配置及用户确认重建时生成的备份不公开。
+SysPulse.json
+SysPulse.json.*.bak
+AGENTS.md
+
+# 个人开发文档与记录仅保留在本地。
+/Docs/
